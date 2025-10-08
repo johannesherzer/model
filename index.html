@@ -302,42 +302,13 @@
                         <label>Retargeting</label>
                         <input type="number" id="retargetingSpend" value="10000" oninput="calculate()">
                     </div>
-                    
-                    <div class="input-group">
-                        <label>Webinars</label>
-                        <input type="number" id="webinarSpend" value="5000" oninput="calculate()">
-                    </div>
-                    
+
                     <div class="input-group">
                         <label>Content/SEO</label>
                         <input type="number" id="seoSpend" value="5000" oninput="calculate()">
                     </div>
-                    
-                    <div class="input-group">
-                        <label>Partnerships</label>
-                        <input type="number" id="partnershipSpend" value="5000" oninput="calculate()">
-                    </div>
                 </div>
-                
-                <div class="section">
-                    <h3>Conversion Rates</h3>
-                    
-                    <div class="slider-group">
-                        <label>Lead → MQL: <span id="cr1Display">63%</span></label>
-                        <input type="range" class="slider" id="cr1" min="30" max="80" value="63" oninput="updateSlider('cr1'); calculate()">
-                    </div>
-                    
-                    <div class="slider-group">
-                        <label>MQL → SQL: <span id="cr2Display">45%</span></label>
-                        <input type="range" class="slider" id="cr2" min="20" max="70" value="45" oninput="updateSlider('cr2'); calculate()">
-                    </div>
-                    
-                    <div class="slider-group">
-                        <label>SQL → Customer: <span id="cr3Display">18%</span></label>
-                        <input type="range" class="slider" id="cr3" min="10" max="40" value="18" oninput="updateSlider('cr3'); calculate()">
-                    </div>
-                </div>
-                
+
                 <div class="section">
                     <h3>Product Mix</h3>
                     
@@ -508,12 +479,38 @@
     
     <script>
         const channels = {
-            google: { name: 'Google Ads', cpl: 200 },
-            linkedin: { name: 'LinkedIn Ads', cpl: 350 },
-            retargeting: { name: 'Retargeting', cpl: 150 },
-            webinar: { name: 'Webinars', cpl: 100 },
-            seo: { name: 'Content/SEO', cpl: 50 },
-            partnership: { name: 'Partnerships', cpl: 80 }
+            google: {
+                name: 'Google Ads',
+                cpl: 211.72,
+                cr1: 0.6305,  // Lead → MQL
+                cr2: 0.45,    // MQL → SQL
+                cr3: 0.21,    // SQL → Customer
+                avgDays: 28
+            },
+            linkedin: {
+                name: 'LinkedIn Ads',
+                cpl: 370.51,
+                cr1: 0.80,
+                cr2: 0.35,
+                cr3: 0.25,
+                avgDays: 56
+            },
+            retargeting: {
+                name: 'Retargeting',
+                cpl: 186.31,
+                cr1: 1.00,
+                cr2: 0.50,
+                cr3: 0.33,
+                avgDays: 21
+            },
+            seo: {
+                name: 'Content/SEO',
+                cpl: 166.66,
+                cr1: 1.00,
+                cr2: 0.30,
+                cr3: 0.20,
+                avgDays: 28
+            }
         };
         
         function updateSlider(sliderId) {
@@ -526,46 +523,60 @@
             const googleSpend = parseFloat(document.getElementById('googleSpend').value) || 0;
             const linkedinSpend = parseFloat(document.getElementById('linkedinSpend').value) || 0;
             const retargetingSpend = parseFloat(document.getElementById('retargetingSpend').value) || 0;
-            const webinarSpend = parseFloat(document.getElementById('webinarSpend').value) || 0;
             const seoSpend = parseFloat(document.getElementById('seoSpend').value) || 0;
-            const partnershipSpend = parseFloat(document.getElementById('partnershipSpend').value) || 0;
-            
-            const totalSpend = googleSpend + linkedinSpend + retargetingSpend + webinarSpend + seoSpend + partnershipSpend;
-            
-            const cr1 = parseFloat(document.getElementById('cr1').value) / 100;
-            const cr2 = parseFloat(document.getElementById('cr2').value) / 100;
-            const cr3 = parseFloat(document.getElementById('cr3').value) / 100;
-            
+
+            const totalSpend = googleSpend + linkedinSpend + retargetingSpend + seoSpend;
+
             const isoMix = parseFloat(document.getElementById('isoMix').value) / 100;
             const isoArpu = parseFloat(document.getElementById('isoArpu').value) || 15000;
             const nis2Arpu = parseFloat(document.getElementById('nis2Arpu').value) || 32000;
-            
+
             const organicLeads = parseFloat(document.getElementById('organicLeads').value) || 0;
             const reactivationSqls = parseFloat(document.getElementById('reactivationSqls').value) || 0;
-            
-            // Calculate leads by channel
+
+            // Calculate each channel's funnel separately with channel-specific conversion rates
             const googleLeads = googleSpend / channels.google.cpl;
+            const googleMqls = googleLeads * channels.google.cr1;
+            const googleSqls = googleMqls * channels.google.cr2;
+            const googleCustomers = googleSqls * channels.google.cr3;
+
             const linkedinLeads = linkedinSpend / channels.linkedin.cpl;
+            const linkedinMqls = linkedinLeads * channels.linkedin.cr1;
+            const linkedinSqls = linkedinMqls * channels.linkedin.cr2;
+            const linkedinCustomers = linkedinSqls * channels.linkedin.cr3;
+
             const retargetingLeads = retargetingSpend / channels.retargeting.cpl;
-            const webinarLeads = webinarSpend / channels.webinar.cpl;
+            const retargetingMqls = retargetingLeads * channels.retargeting.cr1;
+            const retargetingSqls = retargetingMqls * channels.retargeting.cr2;
+            const retargetingCustomers = retargetingSqls * channels.retargeting.cr3;
+
             const seoLeads = seoSpend / channels.seo.cpl;
-            const partnershipLeads = partnershipSpend / channels.partnership.cpl;
-            
-            const paidLeads = googleLeads + linkedinLeads + retargetingLeads + webinarLeads + seoLeads + partnershipLeads;
+            const seoMqls = seoLeads * channels.seo.cr1;
+            const seoSqls = seoMqls * channels.seo.cr2;
+            const seoCustomers = seoSqls * channels.seo.cr3;
+
+            // Aggregate paid channels
+            const paidLeads = googleLeads + linkedinLeads + retargetingLeads + seoLeads;
+            const paidMqls = googleMqls + linkedinMqls + retargetingMqls + seoMqls;
+            const paidSqls = googleSqls + linkedinSqls + retargetingSqls + seoSqls;
+            const paidCustomers = googleCustomers + linkedinCustomers + retargetingCustomers + seoCustomers;
+
+            // Organic uses average conversion rates (blended from paid channels)
+            const avgCr1 = paidLeads > 0 ? paidMqls / paidLeads : 0.75;
+            const avgCr2 = paidMqls > 0 ? paidSqls / paidMqls : 0.40;
+            const avgCr3 = paidSqls > 0 ? paidCustomers / paidSqls : 0.25;
+
+            const organicMqls = organicLeads * avgCr1;
+            const organicSqls = organicMqls * avgCr2;
+            const organicCustomers = organicSqls * avgCr3;
+
+            // Reactivation
+            const reactivationCustomers = reactivationSqls * avgCr3;
+
+            // Totals
             const totalLeads = paidLeads + organicLeads;
-            
-            // Funnel calculations
-            const paidMqls = paidLeads * cr1;
-            const organicMqls = organicLeads * cr1;
             const totalMqls = paidMqls + organicMqls;
-            
-            const paidSqls = paidMqls * cr2;
-            const organicSqls = organicMqls * cr2;
             const totalSqls = paidSqls + organicSqls + reactivationSqls;
-            
-            const paidCustomers = paidSqls * cr3;
-            const organicCustomers = organicSqls * cr3;
-            const reactivationCustomers = reactivationSqls * cr3;
             const totalCustomers = paidCustomers + organicCustomers + reactivationCustomers;
             
             // CAC & Revenue
@@ -616,12 +627,10 @@
             
             // Channel breakdown
             updateChannelBreakdown({
-                google: { spend: googleSpend, leads: googleLeads, customers: googleLeads * cr1 * cr2 * cr3 },
-                linkedin: { spend: linkedinSpend, leads: linkedinLeads, customers: linkedinLeads * cr1 * cr2 * cr3 },
-                retargeting: { spend: retargetingSpend, leads: retargetingLeads, customers: retargetingLeads * cr1 * cr2 * cr3 },
-                webinar: { spend: webinarSpend, leads: webinarLeads, customers: webinarLeads * cr1 * cr2 * cr3 },
-                seo: { spend: seoSpend, leads: seoLeads, customers: seoLeads * cr1 * cr2 * cr3 },
-                partnership: { spend: partnershipSpend, leads: partnershipLeads, customers: partnershipLeads * cr1 * cr2 * cr3 }
+                google: { spend: googleSpend, leads: googleLeads, customers: googleCustomers },
+                linkedin: { spend: linkedinSpend, leads: linkedinLeads, customers: linkedinCustomers },
+                retargeting: { spend: retargetingSpend, leads: retargetingLeads, customers: retargetingCustomers },
+                seo: { spend: seoSpend, leads: seoLeads, customers: seoCustomers }
             });
         }
         
@@ -653,27 +662,21 @@
                     document.getElementById('googleSpend').value = 40000;
                     document.getElementById('linkedinSpend').value = 35000;
                     document.getElementById('retargetingSpend').value = 10000;
-                    document.getElementById('webinarSpend').value = 5000;
                     document.getElementById('seoSpend').value = 5000;
-                    document.getElementById('partnershipSpend').value = 5000;
                     break;
-                    
+
                 case 'optimized':
                     document.getElementById('googleSpend').value = 15000;
                     document.getElementById('linkedinSpend').value = 5000;
                     document.getElementById('retargetingSpend').value = 10000;
-                    document.getElementById('webinarSpend').value = 10000;
                     document.getElementById('seoSpend').value = 15000;
-                    document.getElementById('partnershipSpend').value = 10000;
                     break;
-                    
+
                 case 'aggressive':
                     document.getElementById('googleSpend').value = 20000;
                     document.getElementById('linkedinSpend').value = 0;
                     document.getElementById('retargetingSpend').value = 15000;
-                    document.getElementById('webinarSpend').value = 15000;
                     document.getElementById('seoSpend').value = 25000;
-                    document.getElementById('partnershipSpend').value = 15000;
                     document.getElementById('organicLeads').value = 100;
                     document.getElementById('reactivationSqls').value = 90;
                     break;
