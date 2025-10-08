@@ -273,39 +273,36 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Kertos Growth Model</h1>
-            <p>Marketing spend & pipeline calculator</p>
+            <h1>Kertos Growth Model - Q4 2024</h1>
+            <p>Marketing spend & pipeline calculator (October - December)</p>
         </div>
         
         <div class="content">
             <div class="sidebar">
-                <div class="scenario-buttons">
-                    <button class="scenario-btn" onclick="loadScenario('current')">Current</button>
-                    <button class="scenario-btn" onclick="loadScenario('optimized')">Optimized</button>
-                    <button class="scenario-btn" onclick="loadScenario('aggressive')">Aggressive</button>
-                </div>
-                
                 <div class="section">
                     <h3>Monthly Spend by Channel</h3>
-                    
+                    <small style="color: #718096; display: block; margin-bottom: 12px;">Enter monthly budget (results shown for 3-month quarter)</small>
+
                     <div class="input-group">
                         <label>Google Ads</label>
-                        <input type="number" id="googleSpend" value="40000" oninput="calculate()">
+                        <input type="number" id="googleSpend" value="40000" oninput="validateRetargeting(); calculate()">
                     </div>
-                    
+
                     <div class="input-group">
                         <label>LinkedIn Ads</label>
-                        <input type="number" id="linkedinSpend" value="35000" oninput="calculate()">
+                        <input type="number" id="linkedinSpend" value="35000" oninput="validateRetargeting(); calculate()">
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Retargeting</label>
-                        <input type="number" id="retargetingSpend" value="10000" oninput="calculate()">
+                        <input type="number" id="retargetingSpend" value="7500" oninput="validateRetargeting()">
+                        <small id="retargetingWarning" style="color: #e53e3e; display: none;">Max 10% of Google + LinkedIn budget</small>
                     </div>
 
                     <div class="input-group">
                         <label>Content/SEO</label>
-                        <input type="number" id="seoSpend" value="5000" oninput="calculate()">
+                        <input type="number" id="seoSpend" value="5000" oninput="validateSEO()" max="5000">
+                        <small id="seoWarning" style="color: #e53e3e; display: none;">Max €5,000/month (Q4 limit)</small>
                     </div>
                 </div>
 
@@ -331,16 +328,17 @@
                 
                 <div class="section">
                     <h3>Additional Pipeline</h3>
-                    
+
                     <div class="input-group">
                         <label>Organic Leads/Month</label>
                         <input type="number" id="organicLeads" value="53" oninput="calculate()">
+                        <small>Monthly average</small>
                     </div>
-                    
+
                     <div class="input-group">
                         <label>Reactivation SQLs/Month</label>
                         <input type="number" id="reactivationSqls" value="45" oninput="calculate()">
-                        <small>Direct to SQL</small>
+                        <small>Direct to SQL - monthly average</small>
                     </div>
                 </div>
             </div>
@@ -352,19 +350,19 @@
                         <div class="metric-value" id="cacValue">€0</div>
                         <div class="metric-subtext">Per customer</div>
                     </div>
-                    
+
                     <div class="metric-card">
-                        <div class="metric-label">Monthly Customers</div>
+                        <div class="metric-label">Q4 Customers</div>
                         <div class="metric-value" id="customersValue">0</div>
                         <div class="metric-subtext" id="customersSubtext">All sources</div>
                     </div>
-                    
+
                     <div class="metric-card">
-                        <div class="metric-label">Monthly ARR</div>
+                        <div class="metric-label">Q4 New ARR</div>
                         <div class="metric-value" id="arrValue">€0</div>
-                        <div class="metric-subtext">New revenue</div>
+                        <div class="metric-subtext">Quarterly total</div>
                     </div>
-                    
+
                     <div class="metric-card">
                         <div class="metric-label">LTV:CAC Ratio</div>
                         <div class="metric-value" id="ltvCacValue">0:1</div>
@@ -373,7 +371,7 @@
                 </div>
                 
                 <div class="section">
-                    <h3>Monthly Pipeline Flow</h3>
+                    <h3>Q4 Pipeline Flow</h3>
                     <div class="pipeline-viz">
                         <div class="pipeline-stage">
                             <div class="pipeline-stage-header">
@@ -419,7 +417,7 @@
                 
                 <div class="grid-2">
                     <div class="section">
-                        <h3>Economics Summary</h3>
+                        <h3>Q4 Economics Summary</h3>
                         <table class="table">
                             <tr>
                                 <td>Total Spend</td>
@@ -457,14 +455,14 @@
                     </div>
                     
                     <div class="section">
-                        <h3>Channel Performance</h3>
+                        <h3>Q4 Channel Performance</h3>
                         <table class="table">
                             <thead>
                                 <tr>
                                     <th>Channel</th>
-                                    <th>Spend</th>
-                                    <th>Leads</th>
-                                    <th>Customers</th>
+                                    <th>Q4 Spend</th>
+                                    <th>Q4 Leads</th>
+                                    <th>Q4 Customers</th>
                                     <th>CAC</th>
                                 </tr>
                             </thead>
@@ -518,7 +516,40 @@
             const display = document.getElementById(sliderId + 'Display');
             display.textContent = slider.value + '%';
         }
-        
+
+        function validateRetargeting() {
+            const googleSpend = parseFloat(document.getElementById('googleSpend').value) || 0;
+            const linkedinSpend = parseFloat(document.getElementById('linkedinSpend').value) || 0;
+            const retargetingSpend = parseFloat(document.getElementById('retargetingSpend').value) || 0;
+
+            const maxRetargeting = (googleSpend + linkedinSpend) * 0.10;
+            const warning = document.getElementById('retargetingWarning');
+
+            if (retargetingSpend > maxRetargeting) {
+                warning.style.display = 'block';
+                document.getElementById('retargetingSpend').value = Math.floor(maxRetargeting);
+            } else {
+                warning.style.display = 'none';
+            }
+
+            calculate();
+        }
+
+        function validateSEO() {
+            const seoSpend = parseFloat(document.getElementById('seoSpend').value) || 0;
+            const warning = document.getElementById('seoWarning');
+            const maxSEO = 5000;
+
+            if (seoSpend > maxSEO) {
+                warning.style.display = 'block';
+                document.getElementById('seoSpend').value = maxSEO;
+            } else {
+                warning.style.display = 'none';
+            }
+
+            calculate();
+        }
+
         function calculate() {
             const googleSpend = parseFloat(document.getElementById('googleSpend').value) || 0;
             const linkedinSpend = parseFloat(document.getElementById('linkedinSpend').value) || 0;
@@ -573,64 +604,74 @@
             // Reactivation
             const reactivationCustomers = reactivationSqls * avgCr3;
 
-            // Totals
-            const totalLeads = paidLeads + organicLeads;
-            const totalMqls = paidMqls + organicMqls;
-            const totalSqls = paidSqls + organicSqls + reactivationSqls;
-            const totalCustomers = paidCustomers + organicCustomers + reactivationCustomers;
-            
-            // CAC & Revenue
-            const blendedCac = totalSpend / (totalCustomers || 1);
-            
-            const isoCustomers = totalCustomers * isoMix;
-            const nis2Customers = totalCustomers * (1 - isoMix);
-            
-            const monthlyArr = (isoCustomers * isoArpu) + (nis2Customers * nis2Arpu);
-            const blendedArpu = monthlyArr / (totalCustomers || 1);
+            // Monthly Totals
+            const monthlyLeads = paidLeads + organicLeads;
+            const monthlyMqls = paidMqls + organicMqls;
+            const monthlySqls = paidSqls + organicSqls + reactivationSqls;
+            const monthlyCustomers = paidCustomers + organicCustomers + reactivationCustomers;
+
+            // Quarterly Totals (3 months)
+            const quarterlyLeads = monthlyLeads * 3;
+            const quarterlyMqls = monthlyMqls * 3;
+            const quarterlySqls = monthlySqls * 3;
+            const quarterlyCustomers = monthlyCustomers * 3;
+            const quarterlySpend = totalSpend * 3;
+
+            // CAC & Revenue (using quarterly numbers)
+            const blendedCac = quarterlySpend / (quarterlyCustomers || 1);
+
+            const isoCustomers = quarterlyCustomers * isoMix;
+            const nis2Customers = quarterlyCustomers * (1 - isoMix);
+
+            const quarterlyArr = (isoCustomers * isoArpu) + (nis2Customers * nis2Arpu);
+            const blendedArpu = quarterlyArr / (quarterlyCustomers || 1);
             const blendedLtv = blendedArpu * 2;
-            
-            const roi = monthlyArr / totalSpend;
+
+            const roi = quarterlyArr / quarterlySpend;
             const ltvCacRatio = blendedLtv / blendedCac;
             
             // Update metrics
             document.getElementById('cacValue').textContent = '€' + Math.round(blendedCac).toLocaleString();
-            document.getElementById('customersValue').textContent = Math.round(totalCustomers);
-            document.getElementById('customersSubtext').textContent = `${Math.round(paidCustomers)} paid, ${Math.round(organicCustomers)} organic, ${Math.round(reactivationCustomers)} reactivation`;
-            document.getElementById('arrValue').textContent = '€' + Math.round(monthlyArr).toLocaleString();
+            document.getElementById('customersValue').textContent = Math.round(quarterlyCustomers);
+            const qPaid = Math.round(paidCustomers * 3);
+            const qOrganic = Math.round(organicCustomers * 3);
+            const qReactivation = Math.round(reactivationCustomers * 3);
+            document.getElementById('customersSubtext').textContent = `${qPaid} paid, ${qOrganic} organic, ${qReactivation} reactivation`;
+            document.getElementById('arrValue').textContent = '€' + Math.round(quarterlyArr).toLocaleString();
             document.getElementById('ltvCacValue').textContent = Math.round(ltvCacRatio) + ':1';
-            
-            // Pipeline visualization
-            const maxValue = totalLeads;
-            document.getElementById('leadsCount').textContent = Math.round(totalLeads);
-            document.getElementById('mqlsCount').textContent = Math.round(totalMqls);
-            document.getElementById('sqlsCount').textContent = Math.round(totalSqls);
-            document.getElementById('customersCount').textContent = Math.round(totalCustomers);
-            
+
+            // Pipeline visualization (quarterly numbers)
+            const maxValue = quarterlyLeads;
+            document.getElementById('leadsCount').textContent = Math.round(quarterlyLeads);
+            document.getElementById('mqlsCount').textContent = Math.round(quarterlyMqls);
+            document.getElementById('sqlsCount').textContent = Math.round(quarterlySqls);
+            document.getElementById('customersCount').textContent = Math.round(quarterlyCustomers);
+
             document.getElementById('leadsFill').style.width = '100%';
-            document.getElementById('leadsFill').textContent = Math.round(totalLeads);
-            document.getElementById('mqlsFill').style.width = ((totalMqls / maxValue) * 100) + '%';
-            document.getElementById('mqlsFill').textContent = Math.round(totalMqls);
-            document.getElementById('sqlsFill').style.width = ((totalSqls / maxValue) * 100) + '%';
-            document.getElementById('sqlsFill').textContent = Math.round(totalSqls);
-            document.getElementById('customersFill').style.width = ((totalCustomers / maxValue) * 100) + '%';
-            document.getElementById('customersFill').textContent = Math.round(totalCustomers);
-            
-            // Economics table
-            document.getElementById('totalSpend').textContent = '€' + Math.round(totalSpend).toLocaleString();
-            document.getElementById('cpl').textContent = '€' + Math.round(totalSpend / totalLeads).toLocaleString();
-            document.getElementById('cpmql').textContent = '€' + Math.round(totalSpend / totalMqls).toLocaleString();
-            document.getElementById('cpsql').textContent = '€' + Math.round(totalSpend / totalSqls).toLocaleString();
+            document.getElementById('leadsFill').textContent = Math.round(quarterlyLeads);
+            document.getElementById('mqlsFill').style.width = ((quarterlyMqls / maxValue) * 100) + '%';
+            document.getElementById('mqlsFill').textContent = Math.round(quarterlyMqls);
+            document.getElementById('sqlsFill').style.width = ((quarterlySqls / maxValue) * 100) + '%';
+            document.getElementById('sqlsFill').textContent = Math.round(quarterlySqls);
+            document.getElementById('customersFill').style.width = ((quarterlyCustomers / maxValue) * 100) + '%';
+            document.getElementById('customersFill').textContent = Math.round(quarterlyCustomers);
+
+            // Economics table (quarterly numbers)
+            document.getElementById('totalSpend').textContent = '€' + Math.round(quarterlySpend).toLocaleString();
+            document.getElementById('cpl').textContent = '€' + Math.round(quarterlySpend / quarterlyLeads).toLocaleString();
+            document.getElementById('cpmql').textContent = '€' + Math.round(quarterlySpend / quarterlyMqls).toLocaleString();
+            document.getElementById('cpsql').textContent = '€' + Math.round(quarterlySpend / quarterlySqls).toLocaleString();
             document.getElementById('cac').textContent = '€' + Math.round(blendedCac).toLocaleString();
             document.getElementById('ltv').textContent = '€' + Math.round(blendedLtv).toLocaleString();
             document.getElementById('ltvCac').textContent = Math.round(ltvCacRatio) + ':1';
             document.getElementById('roiValue').textContent = roi.toFixed(1) + 'x';
             
-            // Channel breakdown
+            // Channel breakdown (quarterly totals)
             updateChannelBreakdown({
-                google: { spend: googleSpend, leads: googleLeads, customers: googleCustomers },
-                linkedin: { spend: linkedinSpend, leads: linkedinLeads, customers: linkedinCustomers },
-                retargeting: { spend: retargetingSpend, leads: retargetingLeads, customers: retargetingCustomers },
-                seo: { spend: seoSpend, leads: seoLeads, customers: seoCustomers }
+                google: { spend: googleSpend * 3, leads: googleLeads * 3, customers: googleCustomers * 3 },
+                linkedin: { spend: linkedinSpend * 3, leads: linkedinLeads * 3, customers: linkedinCustomers * 3 },
+                retargeting: { spend: retargetingSpend * 3, leads: retargetingLeads * 3, customers: retargetingCustomers * 3 },
+                seo: { spend: seoSpend * 3, leads: seoLeads * 3, customers: seoCustomers * 3 }
             });
         }
         
@@ -654,34 +695,6 @@
                 `;
                 tbody.innerHTML += row;
             });
-        }
-        
-        function loadScenario(scenario) {
-            switch(scenario) {
-                case 'current':
-                    document.getElementById('googleSpend').value = 40000;
-                    document.getElementById('linkedinSpend').value = 35000;
-                    document.getElementById('retargetingSpend').value = 10000;
-                    document.getElementById('seoSpend').value = 5000;
-                    break;
-
-                case 'optimized':
-                    document.getElementById('googleSpend').value = 15000;
-                    document.getElementById('linkedinSpend').value = 5000;
-                    document.getElementById('retargetingSpend').value = 10000;
-                    document.getElementById('seoSpend').value = 15000;
-                    break;
-
-                case 'aggressive':
-                    document.getElementById('googleSpend').value = 20000;
-                    document.getElementById('linkedinSpend').value = 0;
-                    document.getElementById('retargetingSpend').value = 15000;
-                    document.getElementById('seoSpend').value = 25000;
-                    document.getElementById('organicLeads').value = 100;
-                    document.getElementById('reactivationSqls').value = 90;
-                    break;
-            }
-            calculate();
         }
         
         // Initialize
