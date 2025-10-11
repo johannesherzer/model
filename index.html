@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kertos Growth Model</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2d3748;
+            color: white;
+            padding: 24px 32px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            background: #fafafa;
+            padding: 24px;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+        }
+        
+        .main {
+            padding: 32px;
+            overflow-y: auto;
+        }
+        
+        .section {
+            margin-bottom: 24px;
+        }
+        
+        .section h3 {
+            color: #1a202c;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #4a5568;
+            font-size: 13px;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4299e1;
+        }
+        
+        .input-group small {
+            display: block;
+            color: #a0aec0;
+            margin-top: 4px;
+            font-size: 11px;
+        }
+        
+        .metric-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+        
+        .metric-label {
+            font-size: 11px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .metric-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+        
+        .metric-subtext {
+            font-size: 12px;
+            color: #a0aec0;
+        }
+        
+        .pipeline-viz {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .pipeline-stage {
+            margin-bottom: 12px;
+        }
+        
+        .pipeline-stage-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .pipeline-bar {
+            background: #e2e8f0;
+            height: 24px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .pipeline-fill {
+            height: 100%;
+            background: #4299e1;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 11px;
+        }
+        
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 13px;
+        }
+        
+        .table th {
+            background: #f7fafc;
+            color: #4a5568;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .scenario-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .scenario-btn {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #4a5568;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        
+        .scenario-btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+        }
+        
+        .slider-group {
+            margin-bottom: 16px;
+        }
+        
+        .slider-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #4a5568;
+            font-size: 13px;
+        }
+        
+        .slider {
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        
+        .slider-value {
+            text-align: center;
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Kertos Growth Model - Q4 2024</h1>
+            <p>Marketing spend & pipeline calculator (October - December)</p>
+        </div>
+        
+        <div class="content">
+            <div class="sidebar">
+                <div class="section">
+                    <h3>Monthly Spend by Channel</h3>
+                    <small style="color: #718096; display: block; margin-bottom: 12px;">Enter monthly budget (results shown for 3-month quarter)</small>
+
+                    <div class="input-group">
+                        <label>Google Ads</label>
+                        <input type="number" id="googleSpend" value="30000" oninput="validateRetargeting(); calculate()">
+                    </div>
+
+                    <div class="input-group">
+                        <label>LinkedIn Ads</label>
+                        <input type="number" id="linkedinSpend" value="10000" oninput="validateRetargeting(); calculate()">
+                    </div>
+
+                    <div class="input-group">
+                        <label>Retargeting</label>
+                        <input type="number" id="retargetingSpend" value="4000" oninput="validateRetargeting()">
+                        <small id="retargetingWarning" style="color: #e53e3e; display: none;">Max 10% of Google + LinkedIn budget</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Content/SEO</label>
+                        <input type="number" id="seoSpend" value="5000" oninput="validateSEO()" max="5000">
+                        <small id="seoWarning" style="color: #e53e3e; display: none;">Max €5,000/month (Q4 limit)</small>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Product Mix</h3>
+                    
+                    <div class="slider-group">
+                        <label>ISO/GDPR Mix: <span id="isoMixDisplay">90%</span></label>
+                        <input type="range" class="slider" id="isoMix" min="0" max="100" value="90" oninput="updateSlider('isoMix'); calculate()">
+                        <small>Remaining is NIS2</small>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>ISO/GDPR ARPU (€/year)</label>
+                        <input type="number" id="isoArpu" value="8000" oninput="calculate()">
+                    </div>
+
+                    <div class="input-group">
+                        <label>NIS2 ARPU (€/year)</label>
+                        <input type="number" id="nis2Arpu" value="20000" oninput="calculate()">
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Additional Pipeline</h3>
+
+                    <div class="input-group">
+                        <label>Organic Leads/Month</label>
+                        <input type="number" id="organicLeads" value="30" oninput="calculate()">
+                        <small>Monthly average</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Reactivation SQLs/Month</label>
+                        <input type="number" id="reactivationSqls" value="30" oninput="calculate()">
+                        <small>Direct to SQL - monthly average</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="main">
+                <div class="grid-4">
+                    <div class="metric-card">
+                        <div class="metric-label">Blended CAC</div>
+                        <div class="metric-value" id="cacValue">€0</div>
+                        <div class="metric-subtext">Per customer</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-label">Q4 Customers</div>
+                        <div class="metric-value" id="customersValue">0</div>
+                        <div class="metric-subtext" id="customersSubtext">All sources</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-label">Q4 New ARR</div>
+                        <div class="metric-value" id="arrValue">€0</div>
+                        <div class="metric-subtext">Quarterly total</div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-label">LTV:CAC Ratio</div>
+                        <div class="metric-value" id="ltvCacValue">0:1</div>
+                        <div class="metric-subtext">Unit economics</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Revenue Impact by Year</h3>
+                    <div class="grid-2" style="margin-bottom: 24px;">
+                        <div class="metric-card">
+                            <div class="metric-label">2024 Impact</div>
+                            <div class="metric-value" id="impact2024Customers">0</div>
+                            <div class="metric-subtext" id="impact2024ARR">€0 ARR</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">2025 Impact</div>
+                            <div class="metric-value" id="impact2025Customers">0</div>
+                            <div class="metric-subtext" id="impact2025ARR">€0 ARR</div>
+                        </div>
+                    </div>
+                    <small style="color: #718096; display: block; margin-bottom: 12px;">Based on average sales cycle time per channel</small>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Channel</th>
+                                <th>Avg Days</th>
+                                <th>2024 %</th>
+                                <th>2025 %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="yearImpactTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h3>Q4 Pipeline Flow</h3>
+                    <div class="pipeline-viz">
+                        <div class="pipeline-stage">
+                            <div class="pipeline-stage-header">
+                                <span>Leads</span>
+                                <span id="leadsCount">0</span>
+                            </div>
+                            <div class="pipeline-bar">
+                                <div class="pipeline-fill" id="leadsFill" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="pipeline-stage">
+                            <div class="pipeline-stage-header">
+                                <span>MQLs</span>
+                                <span id="mqlsCount">0</span>
+                            </div>
+                            <div class="pipeline-bar">
+                                <div class="pipeline-fill" id="mqlsFill" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="pipeline-stage">
+                            <div class="pipeline-stage-header">
+                                <span>SQLs</span>
+                                <span id="sqlsCount">0</span>
+                            </div>
+                            <div class="pipeline-bar">
+                                <div class="pipeline-fill" id="sqlsFill" style="width: 40%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="pipeline-stage">
+                            <div class="pipeline-stage-header">
+                                <span>Customers</span>
+                                <span id="customersCount">0</span>
+                            </div>
+                            <div class="pipeline-bar">
+                                <div class="pipeline-fill" id="customersFill" style="width: 10%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid-2">
+                    <div class="section">
+                        <h3>Q4 Economics Summary</h3>
+                        <table class="table">
+                            <tr>
+                                <td>Total Spend</td>
+                                <td id="totalSpend">€0</td>
+                            </tr>
+                            <tr>
+                                <td>Cost per Lead</td>
+                                <td id="cpl">€0</td>
+                            </tr>
+                            <tr>
+                                <td>Cost per MQL</td>
+                                <td id="cpmql">€0</td>
+                            </tr>
+                            <tr>
+                                <td>Cost per SQL</td>
+                                <td id="cpsql">€0</td>
+                            </tr>
+                            <tr>
+                                <td>Blended CAC</td>
+                                <td id="cac">€0</td>
+                            </tr>
+                            <tr>
+                                <td>Blended LTV</td>
+                                <td id="ltv">€0</td>
+                            </tr>
+                            <tr>
+                                <td>LTV:CAC Ratio</td>
+                                <td id="ltvCac">0:1</td>
+                            </tr>
+                            <tr>
+                                <td>ROI Multiple</td>
+                                <td id="roiValue">0x</td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>Q4 Channel Performance</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Channel</th>
+                                    <th>Q4 Spend</th>
+                                    <th>Q4 Leads</th>
+                                    <th>Q4 Customers</th>
+                                    <th>CAC</th>
+                                </tr>
+                            </thead>
+                            <tbody id="channelTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const channels = {
+            google: {
+                name: 'Google Ads',
+                cpl: 211.72,
+                cr1: 0.6305,  // Lead → MQL
+                cr2: 0.45,    // MQL → SQL
+                cr3: 0.21,    // SQL → Customer
+                avgDays: 28
+            },
+            linkedin: {
+                name: 'LinkedIn Ads',
+                cpl: 370.51,
+                cr1: 0.80,
+                cr2: 0.35,
+                cr3: 0.25,
+                avgDays: 56
+            },
+            retargeting: {
+                name: 'Retargeting',
+                cpl: 186.31,
+                cr1: 1.00,
+                cr2: 0.50,
+                cr3: 0.33,
+                avgDays: 21
+            },
+            seo: {
+                name: 'Content/SEO',
+                cpl: 166.66,
+                cr1: 1.00,
+                cr2: 0.30,
+                cr3: 0.20,
+                avgDays: 28
+            }
+        };
+        
+        function updateSlider(sliderId) {
+            const slider = document.getElementById(sliderId);
+            const display = document.getElementById(sliderId + 'Display');
+            display.textContent = slider.value + '%';
+        }
+
+        function validateRetargeting() {
+            const googleSpend = parseFloat(document.getElementById('googleSpend').value) || 0;
+            const linkedinSpend = parseFloat(document.getElementById('linkedinSpend').value) || 0;
+            const retargetingSpend = parseFloat(document.getElementById('retargetingSpend').value) || 0;
+
+            const maxRetargeting = (googleSpend + linkedinSpend) * 0.10;
+            const warning = document.getElementById('retargetingWarning');
+
+            if (retargetingSpend > maxRetargeting) {
+                warning.style.display = 'block';
+                document.getElementById('retargetingSpend').value = Math.floor(maxRetargeting);
+            } else {
+                warning.style.display = 'none';
+            }
+
+            calculate();
+        }
+
+        function validateSEO() {
+            const seoSpend = parseFloat(document.getElementById('seoSpend').value) || 0;
+            const warning = document.getElementById('seoWarning');
+            const maxSEO = 5000;
+
+            if (seoSpend > maxSEO) {
+                warning.style.display = 'block';
+                document.getElementById('seoSpend').value = maxSEO;
+            } else {
+                warning.style.display = 'none';
+            }
+
+            calculate();
+        }
+
+        function calculate() {
+            const googleSpend = parseFloat(document.getElementById('googleSpend').value) || 0;
+            const linkedinSpend = parseFloat(document.getElementById('linkedinSpend').value) || 0;
+            const retargetingSpend = parseFloat(document.getElementById('retargetingSpend').value) || 0;
+            const seoSpend = parseFloat(document.getElementById('seoSpend').value) || 0;
+
+            const totalSpend = googleSpend + linkedinSpend + retargetingSpend + seoSpend;
+
+            const isoMix = parseFloat(document.getElementById('isoMix').value) / 100;
+            const isoArpu = parseFloat(document.getElementById('isoArpu').value) || 8000;
+            const nis2Arpu = parseFloat(document.getElementById('nis2Arpu').value) || 20000;
+
+            const organicLeads = parseFloat(document.getElementById('organicLeads').value) || 0;
+            const reactivationSqls = parseFloat(document.getElementById('reactivationSqls').value) || 0;
+
+            // Calculate each channel's funnel separately with channel-specific conversion rates
+            const googleLeads = googleSpend / channels.google.cpl;
+            const googleMqls = googleLeads * channels.google.cr1;
+            const googleSqls = googleMqls * channels.google.cr2;
+            const googleCustomers = googleSqls * channels.google.cr3;
+
+            const linkedinLeads = linkedinSpend / channels.linkedin.cpl;
+            const linkedinMqls = linkedinLeads * channels.linkedin.cr1;
+            const linkedinSqls = linkedinMqls * channels.linkedin.cr2;
+            const linkedinCustomers = linkedinSqls * channels.linkedin.cr3;
+
+            const retargetingLeads = retargetingSpend / channels.retargeting.cpl;
+            const retargetingMqls = retargetingLeads * channels.retargeting.cr1;
+            const retargetingSqls = retargetingMqls * channels.retargeting.cr2;
+            const retargetingCustomers = retargetingSqls * channels.retargeting.cr3;
+
+            const seoLeads = seoSpend / channels.seo.cpl;
+            const seoMqls = seoLeads * channels.seo.cr1;
+            const seoSqls = seoMqls * channels.seo.cr2;
+            const seoCustomers = seoSqls * channels.seo.cr3;
+
+            // Aggregate paid channels
+            const paidLeads = googleLeads + linkedinLeads + retargetingLeads + seoLeads;
+            const paidMqls = googleMqls + linkedinMqls + retargetingMqls + seoMqls;
+            const paidSqls = googleSqls + linkedinSqls + retargetingSqls + seoSqls;
+            const paidCustomers = googleCustomers + linkedinCustomers + retargetingCustomers + seoCustomers;
+
+            // Organic uses average conversion rates (blended from paid channels)
+            const avgCr1 = paidLeads > 0 ? paidMqls / paidLeads : 0.75;
+            const avgCr2 = paidMqls > 0 ? paidSqls / paidMqls : 0.40;
+            const avgCr3 = paidSqls > 0 ? paidCustomers / paidSqls : 0.25;
+
+            const organicMqls = organicLeads * avgCr1;
+            const organicSqls = organicMqls * avgCr2;
+            const organicCustomers = organicSqls * avgCr3;
+
+            // Reactivation
+            const reactivationCustomers = reactivationSqls * avgCr3;
+
+            // Monthly Totals
+            const monthlyLeads = paidLeads + organicLeads;
+            const monthlyMqls = paidMqls + organicMqls;
+            const monthlySqls = paidSqls + organicSqls + reactivationSqls;
+            const monthlyCustomers = paidCustomers + organicCustomers + reactivationCustomers;
+
+            // Quarterly Totals (3 months)
+            const quarterlyLeads = monthlyLeads * 3;
+            const quarterlyMqls = monthlyMqls * 3;
+            const quarterlySqls = monthlySqls * 3;
+            const quarterlyCustomers = monthlyCustomers * 3;
+            const quarterlySpend = totalSpend * 3;
+
+            // CAC & Revenue (using quarterly numbers)
+            const blendedCac = quarterlySpend / (quarterlyCustomers || 1);
+
+            const isoCustomers = quarterlyCustomers * isoMix;
+            const nis2Customers = quarterlyCustomers * (1 - isoMix);
+
+            const quarterlyArr = (isoCustomers * isoArpu) + (nis2Customers * nis2Arpu);
+            const blendedArpu = quarterlyArr / (quarterlyCustomers || 1);
+            const blendedLtv = blendedArpu * 2;
+
+            const roi = quarterlyArr / quarterlySpend;
+            const ltvCacRatio = blendedLtv / blendedCac;
+
+            // Calculate revenue impact by year based on sales cycle time
+            // Q4 2024 = 92 days (Oct 1 - Dec 31)
+            // For a channel with X days avg cycle:
+            // - Leads from days 1 to (92-X) close in 2024
+            // - Leads from days (92-X+1) to 92 close in 2025
+            const q4Days = 92;
+
+            const google2024Pct = Math.max(0, (q4Days - channels.google.avgDays) / q4Days);
+            const google2025Pct = Math.min(1, channels.google.avgDays / q4Days);
+
+            const linkedin2024Pct = Math.max(0, (q4Days - channels.linkedin.avgDays) / q4Days);
+            const linkedin2025Pct = Math.min(1, channels.linkedin.avgDays / q4Days);
+
+            const retargeting2024Pct = Math.max(0, (q4Days - channels.retargeting.avgDays) / q4Days);
+            const retargeting2025Pct = Math.min(1, channels.retargeting.avgDays / q4Days);
+
+            const seo2024Pct = Math.max(0, (q4Days - channels.seo.avgDays) / q4Days);
+            const seo2025Pct = Math.min(1, channels.seo.avgDays / q4Days);
+
+            // Organic and reactivation assumed to use blended average
+            const avgCycleDays = (
+                (googleLeads * channels.google.avgDays) +
+                (linkedinLeads * channels.linkedin.avgDays) +
+                (retargetingLeads * channels.retargeting.avgDays) +
+                (seoLeads * channels.seo.avgDays)
+            ) / (paidLeads || 1);
+
+            const organic2024Pct = Math.max(0, (q4Days - avgCycleDays) / q4Days);
+            const organic2025Pct = Math.min(1, avgCycleDays / q4Days);
+
+            // Calculate customers by year (quarterly totals)
+            const customers2024 = (
+                (googleCustomers * 3 * google2024Pct) +
+                (linkedinCustomers * 3 * linkedin2024Pct) +
+                (retargetingCustomers * 3 * retargeting2024Pct) +
+                (seoCustomers * 3 * seo2024Pct) +
+                (organicCustomers * 3 * organic2024Pct) +
+                (reactivationCustomers * 3 * organic2024Pct)
+            );
+
+            const customers2025 = (
+                (googleCustomers * 3 * google2025Pct) +
+                (linkedinCustomers * 3 * linkedin2025Pct) +
+                (retargetingCustomers * 3 * retargeting2025Pct) +
+                (seoCustomers * 3 * seo2025Pct) +
+                (organicCustomers * 3 * organic2025Pct) +
+                (reactivationCustomers * 3 * organic2025Pct)
+            );
+
+            // Calculate ARR by year
+            const arr2024 = customers2024 * blendedArpu;
+            const arr2025 = customers2025 * blendedArpu;
+
+            // Update metrics
+            document.getElementById('cacValue').textContent = '€' + Math.round(blendedCac).toLocaleString();
+            document.getElementById('customersValue').textContent = Math.round(quarterlyCustomers);
+            const qPaid = Math.round(paidCustomers * 3);
+            const qOrganic = Math.round(organicCustomers * 3);
+            const qReactivation = Math.round(reactivationCustomers * 3);
+            document.getElementById('customersSubtext').textContent = `${qPaid} paid, ${qOrganic} organic, ${qReactivation} reactivation`;
+            document.getElementById('arrValue').textContent = '€' + Math.round(quarterlyArr).toLocaleString();
+            document.getElementById('ltvCacValue').textContent = Math.round(ltvCacRatio) + ':1';
+
+            // Update year impact metrics
+            document.getElementById('impact2024Customers').textContent = Math.round(customers2024) + ' customers';
+            document.getElementById('impact2024ARR').textContent = '€' + Math.round(arr2024).toLocaleString() + ' ARR';
+            document.getElementById('impact2025Customers').textContent = Math.round(customers2025) + ' customers';
+            document.getElementById('impact2025ARR').textContent = '€' + Math.round(arr2025).toLocaleString() + ' ARR';
+
+            // Update year impact breakdown table
+            const yearImpactTableBody = document.getElementById('yearImpactTableBody');
+            yearImpactTableBody.innerHTML = `
+                <tr>
+                    <td>Google Ads</td>
+                    <td>${channels.google.avgDays} days</td>
+                    <td>${Math.round(google2024Pct * 100)}%</td>
+                    <td>${Math.round(google2025Pct * 100)}%</td>
+                </tr>
+                <tr>
+                    <td>LinkedIn Ads</td>
+                    <td>${channels.linkedin.avgDays} days</td>
+                    <td>${Math.round(linkedin2024Pct * 100)}%</td>
+                    <td>${Math.round(linkedin2025Pct * 100)}%</td>
+                </tr>
+                <tr>
+                    <td>Retargeting</td>
+                    <td>${channels.retargeting.avgDays} days</td>
+                    <td>${Math.round(retargeting2024Pct * 100)}%</td>
+                    <td>${Math.round(retargeting2025Pct * 100)}%</td>
+                </tr>
+                <tr>
+                    <td>Content/SEO</td>
+                    <td>${channels.seo.avgDays} days</td>
+                    <td>${Math.round(seo2024Pct * 100)}%</td>
+                    <td>${Math.round(seo2025Pct * 100)}%</td>
+                </tr>
+                <tr>
+                    <td>Organic/Reactivation</td>
+                    <td>${Math.round(avgCycleDays)} days</td>
+                    <td>${Math.round(organic2024Pct * 100)}%</td>
+                    <td>${Math.round(organic2025Pct * 100)}%</td>
+                </tr>
+            `;
+
+            // Pipeline visualization (quarterly numbers)
+            const maxValue = quarterlyLeads;
+            document.getElementById('leadsCount').textContent = Math.round(quarterlyLeads);
+            document.getElementById('mqlsCount').textContent = Math.round(quarterlyMqls);
+            document.getElementById('sqlsCount').textContent = Math.round(quarterlySqls);
+            document.getElementById('customersCount').textContent = Math.round(quarterlyCustomers);
+
+            document.getElementById('leadsFill').style.width = '100%';
+            document.getElementById('leadsFill').textContent = Math.round(quarterlyLeads);
+            document.getElementById('mqlsFill').style.width = ((quarterlyMqls / maxValue) * 100) + '%';
+            document.getElementById('mqlsFill').textContent = Math.round(quarterlyMqls);
+            document.getElementById('sqlsFill').style.width = ((quarterlySqls / maxValue) * 100) + '%';
+            document.getElementById('sqlsFill').textContent = Math.round(quarterlySqls);
+            document.getElementById('customersFill').style.width = ((quarterlyCustomers / maxValue) * 100) + '%';
+            document.getElementById('customersFill').textContent = Math.round(quarterlyCustomers);
+
+            // Economics table (quarterly numbers)
+            document.getElementById('totalSpend').textContent = '€' + Math.round(quarterlySpend).toLocaleString();
+            document.getElementById('cpl').textContent = '€' + Math.round(quarterlySpend / quarterlyLeads).toLocaleString();
+            document.getElementById('cpmql').textContent = '€' + Math.round(quarterlySpend / quarterlyMqls).toLocaleString();
+            document.getElementById('cpsql').textContent = '€' + Math.round(quarterlySpend / quarterlySqls).toLocaleString();
+            document.getElementById('cac').textContent = '€' + Math.round(blendedCac).toLocaleString();
+            document.getElementById('ltv').textContent = '€' + Math.round(blendedLtv).toLocaleString();
+            document.getElementById('ltvCac').textContent = Math.round(ltvCacRatio) + ':1';
+            document.getElementById('roiValue').textContent = roi.toFixed(1) + 'x';
+            
+            // Channel breakdown (quarterly totals)
+            updateChannelBreakdown({
+                google: { spend: googleSpend * 3, leads: googleLeads * 3, customers: googleCustomers * 3 },
+                linkedin: { spend: linkedinSpend * 3, leads: linkedinLeads * 3, customers: linkedinCustomers * 3 },
+                retargeting: { spend: retargetingSpend * 3, leads: retargetingLeads * 3, customers: retargetingCustomers * 3 },
+                seo: { spend: seoSpend * 3, leads: seoLeads * 3, customers: seoCustomers * 3 }
+            });
+        }
+        
+        function updateChannelBreakdown(channelData) {
+            const tbody = document.getElementById('channelTableBody');
+            tbody.innerHTML = '';
+            
+            Object.keys(channelData).forEach(key => {
+                const data = channelData[key];
+                const channelInfo = channels[key];
+                const cac = data.customers > 0 ? data.spend / data.customers : 0;
+                
+                const row = `
+                    <tr>
+                        <td>${channelInfo.name}</td>
+                        <td>€${Math.round(data.spend).toLocaleString()}</td>
+                        <td>${Math.round(data.leads)}</td>
+                        <td>${Math.round(data.customers)}</td>
+                        <td>€${data.customers > 0 ? Math.round(cac).toLocaleString() : '—'}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+        
+        // Initialize
+        calculate();
+    </script>
+</body>
+</html>
